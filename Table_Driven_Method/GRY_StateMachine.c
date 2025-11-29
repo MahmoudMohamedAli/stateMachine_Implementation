@@ -3,7 +3,12 @@
 #include <string.h>
 
 typedef enum State State_t;
+typedef void (*pStateAction)(State_t state);
 const char *convert_Enum_to_str(State_t currState);
+
+void Red_handler(State_t state);
+void Yellow_handler(State_t state);
+void Green_handler(State_t state);
 
 typedef enum State
 {
@@ -25,15 +30,33 @@ typedef struct Transition
 {
     State_t curr;
     Event_t event;
+    pStateAction action;
     State_t next;
 
 } Transition_t;
 
 Transition_t transition_Table[] = {
-    {RED, TIMEOUT, YELLOW},
-    {YELLOW, TIMEOUT, GREEN},
-    {GREEN, TIMEOUT, RED},
+    {RED, TIMEOUT, Red_handler,YELLOW},
+    {YELLOW, TIMEOUT, Yellow_handler,GREEN},
+    {GREEN, TIMEOUT, Green_handler,RED},
 };
+
+//handler for each state
+void Red_handler(State_t state)
+{
+    puts("Hello Red state!");
+}
+void Yellow_handler(State_t state)
+{
+    puts("Hello Yellow state!");
+}
+
+void Green_handler(State_t state)
+{
+    puts("Hello Green state!");
+}
+
+
 
 const int Transition_Count = sizeof(transition_Table) / sizeof(Transition_t);
 State_t lookup_Transition(State_t curr, Event_t event)
@@ -44,6 +67,7 @@ State_t lookup_Transition(State_t curr, Event_t event)
     {
         if (curr == it[i].curr && event == it[i].event)
         {
+            it[i].action(nextState);
             nextState = it[i].next;
         }
     }
